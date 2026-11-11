@@ -3,11 +3,12 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { authClient } from "@/lib/auth-client";
 
 const navLinks = [
     { label: "Browse Jobs", href: "/jobs" },
@@ -43,6 +44,11 @@ const Navbar = () => {
     const pathname = usePathname() ?? "/";
 
     const navbarRef = useRef<HTMLElement>(null);
+    const router = useRouter();
+
+    const { data: session } = authClient.useSession();
+    const user = session?.user;
+    console.log("User Session Data from Navbar: ", user);
 
     useEffect(() => {
         if (!mobileOpen) return;
@@ -70,6 +76,16 @@ const Navbar = () => {
             document.removeEventListener("mousedown", handleOutsideClick);
         };
     }, [mobileOpen]);
+
+    const handleSignout = async () => {
+        await authClient.signOut({
+            fetchOptions: {
+                onSuccess: () => {
+                    router.push("/sign-in"); // redirect to login page
+                },
+            },
+        });
+    }
 
     return (
         <header
@@ -106,15 +122,32 @@ const Navbar = () => {
 
                 {/* Desktop actions */}
                 <div className="hidden items-center gap-4 md:flex">
-                    <Link
-                        href="/sign-in"
-                        className="text-sm font-medium text-indigo-400 transition-colors hover:text-indigo-300"
-                    >
-                        Sign In
-                    </Link>
-                    <Button className="h-9 rounded-lg bg-indigo-500 px-4 text-white shadow-sm hover:bg-indigo-400">
-                        Get Started
-                    </Button>
+                    {
+                        user ?
+                            <>
+                                <span>Welcome {user?.name}</span>
+                                <Button
+                                    onClick={handleSignout}
+                                    className="h-9 rounded-lg bg-indigo-500 px-4 text-white shadow-sm hover:bg-indigo-400">
+                                    Logout
+                                </Button>
+                            </>
+                            :
+                            <>
+                                <Link
+                                    href="/sign-in"
+                                    className="text-sm font-medium text-indigo-400 transition-colors hover:text-indigo-300"
+                                >
+                                    Sign In
+                                </Link>
+                                <Button
+                                    nativeButton={false}
+                                    render={<Link href='/sign-up' />}
+                                    className="h-9 rounded-lg bg-indigo-500 px-4 text-white shadow-sm hover:bg-indigo-400">
+                                    Get Started
+                                </Button>
+                            </>
+                    }
                 </div>
 
                 {/* Mobile menu trigger */}

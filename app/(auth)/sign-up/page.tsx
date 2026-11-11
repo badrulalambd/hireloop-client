@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import { useState, type FormEvent, type ReactNode } from "react"
 import Link from "next/link"
 
 import PasswordField from "@/components/auth/PasswordField"
@@ -15,7 +15,41 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Briefcase, Search, ShieldCheck } from "lucide-react"
 import { authClient } from "@/lib/auth-client"
+import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
+
+type Role = "seeker" | "recruiter" | "admin"
+
+type RoleOption = {
+    value: Role
+    label: string
+    description: string
+    icon: ReactNode
+}
+
+const roles: RoleOption[] = [
+    {
+        value: "seeker",
+        label: "Job Seeker",
+        description: "Search and apply for jobs",
+        icon: <Search className="size-3.5" />,
+    },
+    {
+        value: "recruiter",
+        label: "Recruiter",
+        description: "Post jobs and hire talent",
+        icon: <Briefcase className="size-3.5" />,
+    },
+    {
+        value: "admin",
+        label: "Admin",
+        description: "Manage the platform",
+        icon: <ShieldCheck className="size-3.5" />,
+    },
+]
 
 type SignUpValues = {
     name: string
@@ -33,8 +67,9 @@ const initialValues: SignUpValues = {
 
 const SignUpPage = () => {
     const [values, setValues] = useState<SignUpValues>(initialValues)
+    const [role, setRole] = useState<Role>("seeker")
     const [error, setError] = useState<string | null>(null)
-    const [status, setStatus] = useState<string | null>(null)
+    const router = useRouter()
 
     const updateField = (field: keyof SignUpValues) => (value: string) =>
         setValues((current) => ({ ...current, [field]: value }))
@@ -43,24 +78,30 @@ const SignUpPage = () => {
         event.preventDefault()
 
         if (values.password !== values.confirmPassword) {
-            setStatus(null)
             setError("Passwords do not match.")
             return
         }
 
         setError(null)
 
-        // TODO: wire up better-auth sign-up once the backend is ready.
-        console.log("[sign-up] received form data:", values)
-
-        const { data, error } = await authClient.signUp.email({
+        const { error: authError } = await authClient.signUp.email({
             name: values.name,
             email: values.email,
             password: values.password,
-            callbackURL: "/"
-        });
+            role,
+            callbackURL: "/sign-in",
+        })
 
-        setStatus("Form data received — authentication will be connected soon.")
+        if (authError) {
+            setError(
+                authError.message || "Something went wrong. Please try again.",
+            )
+            return
+        }
+
+        // Sign-up does not create a session (autoSignIn: false), so the
+        // user has to log in — send them to the sign-in page.
+        router.push("/sign-in")
     }
 
     return (
@@ -104,6 +145,52 @@ const SignUpPage = () => {
                         />
                     </div>
 
+                    <div className="flex flex-col gap-2">
+                        <span id="role-label" className="text-sm font-medium">
+                            Sign up as
+                        </span>
+                        <RadioGroup
+                            value={role}
+                            onValueChange={(value) => setRole(value as Role)}
+                            name="role"
+                            aria-labelledby="role-label"
+                            className="grid gap-2"
+                        >
+                            {roles.map((option) => {
+                                const selected = option.value === role
+
+                                return (
+                                    <Label
+                                        key={option.value}
+                                        className={cn(
+                                            "flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 leading-normal transition-colors",
+                                            "has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50",
+                                            selected
+                                                ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                                                : "border-input hover:bg-muted/60 dark:bg-input/20",
+                                        )}
+                                    >
+                                        <RadioGroupItem
+                                            value={option.value}
+                                            className="shrink-0"
+                                        />
+                                        <span className="flex min-w-0 flex-1 flex-col">
+                                            <span className="flex items-center gap-1.5 text-sm font-medium">
+                                                <span className="text-indigo-500 dark:text-indigo-400">
+                                                    {option.icon}
+                                                </span>
+                                                {option.label}
+                                            </span>
+                                            <span className="text-xs text-muted-foreground">
+                                                {option.description}
+                                            </span>
+                                        </span>
+                                    </Label>
+                                )
+                            })}
+                        </RadioGroup>
+                    </div>
+
                     <PasswordField
                         id="password"
                         name="password"
@@ -138,15 +225,6 @@ const SignUpPage = () => {
                     >
                         Create account
                     </Button>
-
-                    {status ? (
-                        <p
-                            role="status"
-                            className="text-center text-sm text-muted-foreground"
-                        >
-                            {status}
-                        </p>
-                    ) : null}
                 </form>
             </CardContent>
 
