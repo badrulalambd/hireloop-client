@@ -11,6 +11,8 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { getJobs } from "@/lib/api/jobs"
+import { IJobFormDataType } from "@/type/types"
 
 /* ------------------------------------------------------------------ */
 /*  Job post shape — mirrors the add-job form fields exactly, plus     */
@@ -22,7 +24,7 @@ type SalaryFrequency = "per hour" | "per day" | "per week" | "per month" | "per 
 type JobStatus = "active" | "expired" | "closed" | "draft"
 
 type JobPosting = {
-    id: string
+    _id: string
     /* --- submitted by the Post a New Job form --- */
     jobTitle: string
     companyName: string
@@ -49,7 +51,7 @@ type JobPosting = {
 
 const demoJobs: JobPosting[] = [
     {
-        id: "job_frontend_developer",
+        _id: "job_frontend_developer",
         jobTitle: "Frontend Developer",
         companyName: "HirePulse Network",
         jobCategory: "Engineering & Tech",
@@ -69,7 +71,7 @@ const demoJobs: JobPosting[] = [
         postedLabel: "4d ago",
     },
     {
-        id: "job_senior_product_designer",
+        _id: "job_senior_product_designer",
         jobTitle: "Senior Product Designer",
         companyName: "HirePulse Labs",
         jobCategory: "Design & Creative",
@@ -88,7 +90,7 @@ const demoJobs: JobPosting[] = [
         postedLabel: "1w ago",
     },
     {
-        id: "job_devops_specialist",
+        _id: "job_devops_specialist",
         jobTitle: "DevOps Specialist",
         companyName: "HirePulse Platform",
         jobCategory: "Infrastructure",
@@ -107,7 +109,7 @@ const demoJobs: JobPosting[] = [
         postedLabel: "2w ago",
     },
     {
-        id: "job_product_marketing_lead",
+        _id: "job_product_marketing_lead",
         jobTitle: "Product Marketing Lead",
         companyName: "HirePulse Network",
         jobCategory: "Marketing",
@@ -125,7 +127,7 @@ const demoJobs: JobPosting[] = [
         postedLabel: "5d ago",
     },
     {
-        id: "job_qa_automation_engineer",
+        _id: "job_qa_automation_engineer",
         jobTitle: "QA Automation Engineer",
         companyName: "HirePulse Platform",
         jobCategory: "Quality",
@@ -277,7 +279,10 @@ function StatusBadge({ status }: { status: JobStatus }) {
 /*  Page                                                               */
 /* ------------------------------------------------------------------ */
 
-const ManageJobsPage = () => {
+const ManageJobsPage = async () => {
+    const jobsData : JobPosting[] = await getJobs();
+    console.log("JobsData in Jobs page: ", jobsData);
+
     return (
         <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             {/* ---------- Page header ---------- */}
@@ -335,9 +340,9 @@ const ManageJobsPage = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
-                            {demoJobs.map((job) => (
+                            {jobsData.map((job) => (
                                 <tr
-                                    key={job.id}
+                                    key={job._id}
                                     className="transition-colors hover:bg-muted/40"
                                 >
                                     {/* Job title & dept */}
@@ -412,7 +417,7 @@ const ManageJobsPage = () => {
                 {/* Phone / small tablet: stacked cards with the same data */}
                 <ul className="divide-y divide-border lg:hidden" data-mobile-cards>
                     {demoJobs.map((job) => (
-                        <li key={job.id} className="space-y-3 p-4">
+                        <li key={job._id} className="space-y-3 p-4">
                             <div className="flex items-start gap-3">
                                 <JobIcon />
                                 <div className="min-w-0 flex-1">

@@ -22,6 +22,7 @@ export type SalaryFrequency =
     | "per year";
 
 export interface IJobFormDataType {
+    _id: string;
     jobTitle: string;
     companyName: string;
     jobCategory: JobCategory;
