@@ -10,12 +10,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
 
-const navLinks = [
-    { label: "Browse Jobs", href: "/jobs" },
-    { label: "Company", href: "/company" },
-    { label: "Pricing", href: "/pricing" },
-];
-
 function isLinkActive(pathname: string, href: string) {
     return pathname === href || pathname.startsWith(`${href}/`);
 }
@@ -49,6 +43,14 @@ const Navbar = () => {
     const { data: session } = authClient.useSession();
     const user = session?.user;
     console.log("User Session Data from Navbar: ", user);
+
+    const navLinks = [
+        { label: "Browse Jobs", href: "/jobs" },
+        { label: "Company", href: "/company" },
+        { label: "Pricing", href: "/pricing" },
+        { label: "Dashboard", href: `/dashboard/${user?.role || 'seeker'}` },
+    ];
+
 
     useEffect(() => {
         if (!mobileOpen) return;
