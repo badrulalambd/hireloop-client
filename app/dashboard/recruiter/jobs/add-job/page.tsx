@@ -26,7 +26,9 @@ const JOB_TYPES = [
 const JOB_CATEGORIES = [
     "Engineering & Tech",
     "Design & Creative",
+    "Infrastructure",
     "Marketing",
+    "Quality",
     "Sales",
     "Finance",
     "Operations",
