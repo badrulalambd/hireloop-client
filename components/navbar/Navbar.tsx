@@ -42,7 +42,6 @@ const Navbar = () => {
 
     const { data: session } = authClient.useSession();
     const user = session?.user;
-    console.log("User Session Data from Navbar: ", user);
 
     const navLinks = [
         { label: "Browse Jobs", href: "/jobs" },

@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { ChevronDown, ChevronRight, Send } from "lucide-react"
+import { createJobs } from "@/lib/actions/jobs"
+import { IJobFormDataType, JobCategory, JobType, SalaryFrequency } from "@/type/types"
 
 /* ------------------------------------------------------------------ */
 /*  Sample content lifted from the Figma design                        */
@@ -94,11 +96,28 @@ const selectClassName =
 /* ------------------------------------------------------------------ */
 
 const AddJobPage = () => {
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-        const jobData = Object.fromEntries(new FormData(event.currentTarget))
-        // TODO: upload to MongoDB through better-auth
-        console.log("New job posting:", jobData)
+        const formData = new FormData(event.currentTarget);
+
+    const jobData: IJobFormDataType = {
+        jobTitle: formData.get("jobTitle") as string,
+        companyName: formData.get("companyName") as string,
+        jobCategory: formData.get("jobCategory") as JobCategory,
+        jobType: formData.get("jobType") as JobType,
+        isRemote: formData.get("isRemote") === "true",
+        location: formData.get("location") as string,
+        deadline: (formData.get("deadline") as string) || undefined,
+        minSalary: Number(formData.get("minSalary")) || undefined,
+        maxSalary: Number(formData.get("maxSalary")) || undefined,
+        salaryFrequency: formData.get("salaryFrequency") as SalaryFrequency,
+        responsibilities: formData.get("responsibilities") as string,
+        qualifications: formData.get("qualifications") as string,
+    };
+     console.log("jobData: ", jobData);
+    const result = await createJobs(jobData);
+    console.log("Result for jobData: ", result);
+
     }
 
     return (
