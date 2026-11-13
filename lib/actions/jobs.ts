@@ -12,6 +12,12 @@ export const createJobs = async (jobData : IJobFormDataType) => {
         body: JSON.stringify(jobData),
     });
     const resData = await res.json();
-    console.log("Server Res after POST job", resData);
     return resData;
+}
+
+export const deleteJob = async (jobId : string) => {
+    const res = await fetch(`${BASE_URL}/jobs/${jobId}`, {
+        method: "DELETE",
+    });
+    return res.json();
 }

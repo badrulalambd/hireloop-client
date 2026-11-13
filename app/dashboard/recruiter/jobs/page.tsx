@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { getJobs } from "@/lib/api/jobs"
 import { IJobFormDataType } from "@/type/types"
+import { DeleteJobAlertDialog } from "@/app/components/DeleteJobAlertDialog"
 
 /* ------------------------------------------------------------------ */
 /*  Job post shape — mirrors the add-job form fields exactly, plus     */
@@ -23,7 +24,7 @@ type JobType = "full-time" | "part-time" | "contract" | "internship"
 type SalaryFrequency = "per hour" | "per day" | "per week" | "per month" | "per year"
 type JobStatus = "active" | "expired" | "closed" | "draft"
 
-type JobPosting = {
+export type JobPosting = {
     _id: string
     /* --- submitted by the Post a New Job form --- */
     jobTitle: string
@@ -222,33 +223,6 @@ const COLUMNS = [
     "Actions",
 ] as const
 
-function RowActions({ title }: { title: string }) {
-    return (
-        <div className="flex items-center gap-1.5">
-            <Button variant="outline" size="sm" className="gap-1.5 text-muted-foreground">
-                <Pencil className="size-3.5" aria-hidden />
-                Update
-            </Button>
-            <Button
-                variant="outline"
-                size="icon-sm"
-                className="text-muted-foreground"
-                aria-label={`View applicants for ${title}`}
-            >
-                <Eye className="size-4" aria-hidden />
-            </Button>
-            <Button
-                variant="outline"
-                size="icon-sm"
-                className="text-muted-foreground hover:text-destructive"
-                aria-label={`Delete ${title}`}
-            >
-                <Trash2 className="size-4" aria-hidden />
-            </Button>
-        </div>
-    )
-}
-
 function JobIcon() {
     return (
         <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-indigo-500/10 text-indigo-500 dark:bg-indigo-500/15 dark:text-indigo-400">
@@ -280,7 +254,7 @@ function StatusBadge({ status }: { status: JobStatus }) {
 /* ------------------------------------------------------------------ */
 
 const ManageJobsPage = async () => {
-    const jobsData : JobPosting[] = await getJobs();
+    const jobsData: JobPosting[] = await getJobs();
     console.log("JobsData in Jobs page: ", jobsData);
 
     return (
@@ -406,7 +380,23 @@ const ManageJobsPage = async () => {
 
                                     {/* Actions */}
                                     <td className="px-4 py-3.5">
-                                        <RowActions title={job.jobTitle} />
+                                        <div className="flex items-center gap-1.5">
+                                            <Button variant="outline" size="sm" className="gap-1.5 text-muted-foreground">
+                                                <Pencil className="size-3.5" aria-hidden />
+                                                Update
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="icon-sm"
+                                                className="text-muted-foreground"
+                                                aria-label={`View applicants for ${job.jobTitle}`}
+                                            >
+                                                <Eye className="size-4" aria-hidden />
+                                            </Button>
+                                            <DeleteJobAlertDialog 
+                                            job={job}
+                                            />
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -416,7 +406,7 @@ const ManageJobsPage = async () => {
 
                 {/* Phone / small tablet: stacked cards with the same data */}
                 <ul className="divide-y divide-border lg:hidden" data-mobile-cards>
-                    {demoJobs.map((job) => (
+                    {jobsData.map((job) => (
                         <li key={job._id} className="space-y-3 p-4">
                             <div className="flex items-start gap-3">
                                 <JobIcon />
@@ -466,7 +456,23 @@ const ManageJobsPage = async () => {
                                     <Users className="size-4 text-muted-foreground" aria-hidden />
                                     {job.applicants} Candidates
                                 </span>
-                                <RowActions title={job.jobTitle} />
+                                <div className="flex items-center gap-1.5">
+                                    <Button variant="outline" size="sm" className="gap-1.5 text-muted-foreground">
+                                        <Pencil className="size-3.5" aria-hidden />
+                                        Update
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="icon-sm"
+                                        className="text-muted-foreground"
+                                        aria-label={`View applicants for ${job.jobTitle}`}
+                                    >
+                                        <Eye className="size-4" aria-hidden />
+                                    </Button>
+                                    <DeleteJobAlertDialog 
+                                    job={job}
+                                    />
+                                </div>
                             </div>
                         </li>
                     ))}

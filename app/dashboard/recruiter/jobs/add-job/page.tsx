@@ -11,6 +11,9 @@ import { cn } from "@/lib/utils"
 import { ChevronDown, ChevronRight, Send } from "lucide-react"
 import { createJobs } from "@/lib/actions/jobs"
 import { IJobFormDataType, JobCategory, JobType, SalaryFrequency } from "@/type/types"
+import { toast } from "@/components/ui/toast"
+import { useRouter } from "next/navigation"
+import { randomInt } from "crypto"
 
 /* ------------------------------------------------------------------ */
 /*  Sample content lifted from the Figma design                        */
@@ -98,27 +101,46 @@ const selectClassName =
 /* ------------------------------------------------------------------ */
 
 const AddJobPage = () => {
+
+    const router = useRouter();
+
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         const formData = new FormData(event.currentTarget);
 
-    const jobData: IJobFormDataType = {
-        jobTitle: formData.get("jobTitle") as string,
-        companyName: formData.get("companyName") as string,
-        jobCategory: formData.get("jobCategory") as JobCategory,
-        jobType: formData.get("jobType") as JobType,
-        isRemote: formData.get("isRemote") === "true",
-        location: formData.get("location") as string,
-        deadline: (formData.get("deadline") as string) || undefined,
-        minSalary: Number(formData.get("minSalary")) || undefined,
-        maxSalary: Number(formData.get("maxSalary")) || undefined,
-        salaryFrequency: formData.get("salaryFrequency") as SalaryFrequency,
-        responsibilities: formData.get("responsibilities") as string,
-        qualifications: formData.get("qualifications") as string,
-    };
-     console.log("jobData: ", jobData);
-    const result = await createJobs(jobData);
-    console.log("Result for jobData: ", result);
+        const jobData: IJobFormDataType = {
+            jobTitle: formData.get("jobTitle") as string,
+            companyName: formData.get("companyName") as string,
+            jobCategory: formData.get("jobCategory") as JobCategory,
+            jobType: formData.get("jobType") as JobType,
+            isRemote: formData.get("isRemote") === "true",
+            location: formData.get("location") as string,
+            deadline: (formData.get("deadline") as string) || undefined,
+            minSalary: Number(formData.get("minSalary")) || undefined,
+            maxSalary: Number(formData.get("maxSalary")) || undefined,
+            salaryFrequency: formData.get("salaryFrequency") as SalaryFrequency,
+            responsibilities: formData.get("responsibilities") as string,
+            qualifications: formData.get("qualifications") as string,
+        };
+        console.log("jobData: ", jobData);
+        const applicants = Math.floor(Math.random() * 20) + 1;
+
+        const status = "active";
+        const jobDataWithStatus = {
+            ...jobData,
+            applicants,
+            status,
+        }
+        const result = await createJobs(jobDataWithStatus);
+        console.log("Result for jobData: ", result);
+        if (result.insertedId) {
+            toast.add({
+                type: "success",
+                title: "Job created Successfully",
+                description: "Job Id: " + result.insertedId,
+            })
+            router.push("/dashboard/recruiter/jobs");
+        }
 
     }
 
