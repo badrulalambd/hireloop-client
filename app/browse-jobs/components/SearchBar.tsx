@@ -1,16 +1,23 @@
 "use client";
 
 import { Search } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 /**
  * Full-width search panel: keyword input + "Search Jobs" submit button.
  * The submit handler only logs for now — wiring the query is left for later.
  */
 export function SearchBar() {
+    const router = useRouter();
     const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const query = Object.fromEntries(new FormData(event.currentTarget));
         console.log("Search submitted:", query);
+
+        const search = query.searchField;
+        const searchParams = new URLSearchParams();
+        searchParams.set('search', search as string);
+        router.push(`/browse-jobs?${searchParams.toString()}`);
     };
 
     return (
@@ -26,7 +33,7 @@ export function SearchBar() {
                     />
                     <input
                         type="search"
-                        name="q"
+                        name="searchField"
                         aria-label="Search jobs"
                         placeholder="Search by job title, keywords..."
                         className="h-16 w-full appearance-none rounded-xl border border-white/[0.08] bg-[#24242e] pl-14 pr-5 text-base text-white outline-none transition-colors placeholder:text-[#c0c0d7] focus:border-white/25 md:h-[84px]"
