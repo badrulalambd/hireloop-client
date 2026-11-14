@@ -123,9 +123,10 @@ const AddJobPage = () => {
             qualifications: formData.get("qualifications") as string,
         };
         console.log("jobData: ", jobData);
-        const applicants = Math.floor(Math.random() * 20) + 1;
 
+        const applicants = 0;
         const status = "active";
+        
         const jobDataWithStatus = {
             ...jobData,
             applicants,
